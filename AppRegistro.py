@@ -19,20 +19,20 @@ scopes = [
 
 @st.cache_resource
 def obtener_cliente():
-    # Caso 1: Local (Tu PC)
+    # Caso 1: Local
     if os.path.exists(ruta_json):
         credentials = service_account.Credentials.from_service_account_file(
             ruta_json, scopes=scopes
         )
-    # Caso 2: Streamlit Cloud (Nube)
+    # Caso 2: Streamlit Cloud
     else:
-        # Extraemos el diccionario de los secretos de Streamlit
         info = dict(st.secrets["gcp_service_account"])
         
-        # LIMPIEZA CRÍTICA DE LA LLAVE:
-        # Reemplazamos los caracteres de texto "\n" por saltos de línea reales
-        if "private_key" in info:
-            info["private_key"] = info["private_key"].replace("\\n", "\n")
+        # Limpieza inteligente de la llave
+        raw_key = info["private_key"]
+        # Si la llave viene con el texto literal \n, lo convertimos a salto real
+        if "\\n" in raw_key:
+            info["private_key"] = raw_key.replace("\\n", "\n")
         
         credentials = service_account.Credentials.from_service_account_info(
             info, scopes=scopes
