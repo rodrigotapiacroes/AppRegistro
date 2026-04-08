@@ -53,12 +53,12 @@ if st.button('🔄 Actualizar datos ahora'):
 
 # --- 4. LÓGICA DE DATOS ---
 sql_grafico = """
-    SELECT
-	Folio,
+    SELECt
         Producto,
         SUM(Cantidad) as Total_Vendido
     FROM `pan-database-491915.dataset.ventas_final` 
     WHERE Folio != 'Folio'
+	AND Producto IS NOT NULL
         AND Cantidad IS NOT NULL
     GROUP BY Producto
     ORDER BY Total_Vendido DESC
