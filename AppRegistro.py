@@ -5,11 +5,10 @@ import streamlit as st
 from google.oauth2 import service_account
 from google.cloud import bigquery
 
-# --- 1. CONFIGURACIÓN DE LA PÁGINA (Debe ser lo primero) ---
+# --- 1. CONFIGURACIÓN DE LA PÁGINA ---
 st.set_page_config(page_title="Dashboard Pan Pa Ti", layout="wide")
 
 # --- 2. CREDENCIALES Y CLIENTE ---
-# Definimos la ruta local
 ruta_json = r"C:\Users\alons\Desktop\Pan Pa ti\App Web\Spark\credenciales\pan-database-491915-a0418ffe970e.json"
 
 scopes = [
@@ -20,32 +19,28 @@ scopes = [
 
 @st.cache_resource
 def obtener_cliente():
-    # Si el archivo existe localmente, lo usa. Si no (en la nube), usa secrets.
+    # Caso 1: Local
     if os.path.exists(ruta_json):
         credentials = service_account.Credentials.from_service_account_file(
             ruta_json, scopes=scopes
         )
+    # Caso 2: Streamlit Cloud
     else:
-        else:
-    	     # Creamos un diccionario basado en los secretos
-             info = dict(st.secrets["gcp_service_account"])
-             # Reparamos posibles errores de formato en la llave privada
-             info["private_key"] = info["private_key"].replace("\\n", "\n")
-    
-             credentials = service_account.Credentials.from_service_account_info(
-             info, scopes=scopes
-    )
+        info = dict(st.secrets["gcp_service_account"])
+        info["private_key"] = info["private_key"].replace("\\n", "\n")
+        credentials = service_account.Credentials.from_service_account_info(
+            info, scopes=scopes
+        )
     return bigquery.Client(credentials=credentials, project="pan-database-491915")
 
 client = obtener_cliente()
 
-# --- 3. INTERFAZ DE USUARIO (Título y Botón) ---
+# --- 3. INTERFAZ DE USUARIO ---
 st.title("🍞 Dashboard de Ventas Pan Pa Ti")
 
-# Botón de actualización
 if st.button('🔄 Actualizar datos ahora'):
-    st.cache_data.clear()  # Limpia la memoria cache
-    st.rerun()             # Recarga la app
+    st.cache_data.clear()
+    st.rerun()
 
 # --- 4. LÓGICA DE DATOS ---
 sql_grafico = """
@@ -71,18 +66,14 @@ try:
     if df.empty:
         st.warning("No se encontraron datos. Verifica la tabla en BigQuery.")
     else:
-        # --- CREACIÓN DEL GRÁFICO ---
         fig, ax = plt.subplots(figsize=(12, 6))
-        
         colores = plt.cm.Paired(range(len(df)))
         bars = ax.bar(df['Producto'], df['Total_Vendido'], 
                       color=colores, edgecolor='black', alpha=0.8)
 
-        # Etiquetas sobre las barras
         for bar in bars:
             yval = bar.get_height()
-            ancho_barra = bar.get_width()
-            ax.text(bar.get_x() + ancho_barra/2, 
+            ax.text(bar.get_x() + bar.get_width()/2, 
                     yval + 0.1, 
                     str(int(yval)), 
                     ha='center', va='bottom', fontweight='bold')
@@ -92,10 +83,8 @@ try:
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
 
-        # Mostrar el gráfico en la web
         st.pyplot(fig)
         
-        # Opcional: Mostrar la tabla de datos debajo
         with st.expander("Ver datos detallados"):
             st.write(df)
 
