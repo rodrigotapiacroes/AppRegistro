@@ -26,10 +26,15 @@ def obtener_cliente():
             ruta_json, scopes=scopes
         )
     else:
-        # Esto es para cuando lo subas a Streamlit Cloud
-        credentials = service_account.Credentials.from_service_account_info(
-            st.secrets["gcp_service_account"], scopes=scopes
-        )
+        else:
+    	     # Creamos un diccionario basado en los secretos
+             info = dict(st.secrets["gcp_service_account"])
+             # Reparamos posibles errores de formato en la llave privada
+             info["private_key"] = info["private_key"].replace("\\n", "\n")
+    
+             credentials = service_account.Credentials.from_service_account_info(
+             info, scopes=scopes
+    )
     return bigquery.Client(credentials=credentials, project="pan-database-491915")
 
 client = obtener_cliente()
