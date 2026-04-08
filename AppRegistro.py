@@ -19,20 +19,21 @@ scopes = [
 
 @st.cache_resource
 def obtener_cliente():
-    # Caso 1: Local
     if os.path.exists(ruta_json):
         credentials = service_account.Credentials.from_service_account_file(
             ruta_json, scopes=scopes
         )
-    # Caso 2: Streamlit Cloud
     else:
+        # Cargamos los secretos de Streamlit Cloud
         info = dict(st.secrets["gcp_service_account"])
+        # Reparamos la llave PEM
         info["private_key"] = info["private_key"].replace("\\n", "\n")
+        
         credentials = service_account.Credentials.from_service_account_info(
             info, scopes=scopes
         )
-    return bigquery.Client(credentials=credentials, project="pan-database-491915")
-
+        
+    return bigquery.Client(credentials=credentials, project=info["project_id"])
 client = obtener_cliente()
 
 # --- 3. INTERFAZ DE USUARIO ---
