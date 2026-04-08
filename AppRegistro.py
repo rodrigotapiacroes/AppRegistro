@@ -6,7 +6,7 @@ from google.oauth2 import service_account
 from google.cloud import bigquery
 
 # --- 1. CONFIGURACIÓN DE LA PÁGINA (Siempre al inicio) ---
-st.set_page_config(page_title="Dashboard Pan Pa Ti", layout="wide")
+st.set_page_config(page_title="Dashboard Pan Pa Ti", layout="wide", page_icon="🍞")
 
 # --- 2. CREDENCIALES Y CLIENTE ---
 ruta_json = r"C:\Users\alons\Desktop\Pan Pa ti\App Web\Spark\credenciales\pan-database-491915-a0418ffe970e.json"
@@ -54,6 +54,7 @@ if st.button('🔄 Actualizar datos ahora'):
 # --- 4. LÓGICA DE DATOS ---
 sql_grafico = """
     SELECT
+	Folio,
         Producto,
         SUM(Cantidad) as Total_Vendido
     FROM `pan-database-491915.dataset.ventas_final` 
