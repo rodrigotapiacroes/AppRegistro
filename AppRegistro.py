@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from google.oauth2 import service_account
 from google.cloud import bigquery
+import seaborn as sbn
 
 # --- 1. CONFIGURACIÓN DE LA PÁGINA (Siempre al inicio) ---
 st.set_page_config(page_title="Dashboard Pan Pa Ti", layout="wide", page_icon="🍞")
@@ -51,6 +52,8 @@ if st.button('🔄 Actualizar datos ahora'):
     st.cache_data.clear()
     st.rerun()
 
+# ## Grafico de Barras
+
 # --- 4. LÓGICA DE DATOS ---
 sql_grafico = """
     SELECt
@@ -97,7 +100,10 @@ try:
 
         # Renderizar en Streamlit
         st.pyplot(fig)
-        
+
+
+
+    
         # Tabla detallada oculta en un expander
         with st.expander("Ver tabla de datos detallada"):
             st.dataframe(df, use_container_width=True)
@@ -105,3 +111,77 @@ try:
 except Exception as e:
     st.error(f"Error al generar el gráfico: {e}")
     st.info("💡 Tip: Si el error es de permisos (403), comprueba que el email de la Service Account tenga acceso al archivo origen.")
+
+# ## Grafico de Lineas
+
+# +
+### Logica de los Datos
+
+sql_grafico2= """
+    SELECT
+    Fecha_Pago,
+    ROUND(SUM(TOTAL)) AS Total_Ganancia
+    FROM ´pan-database-491915.dataset.ventas_final´
+    WHERE Cantidad IS NOT NULL
+    GROUP BY Fecha_Pago
+    ORDER BY Fecha_Pago DESC;
+"""
+
+# +
+
+try:
+    df = cargar_datos(sql_grafico2)
+
+    if df.empty:
+        st.warning("No se encontraron datos validos para lanzar el grafico")
+
+    else:
+        # 3. Creamos el gráfico usando seaborn.objects
+        # Usamos 'df' que es donde guardaste la consulta
+        grafico = (
+            so.Plot(df, x="Fecha_Pago", y="Total_Ganancia")
+            .add(so.Line())
+        )
+        
+        # 4. Mostramos el gráfico en Streamlit
+        # La función .plot() de seaborn.objects genera una figura de Matplotlib
+        st.pyplot(grafico.plot())
+except Exception as e:
+    st.error(f"Error al generar el gráfico: {e}")
+    st.info("💡 Tip: Si el error es de permisos (403), comprueba que el email de la Service Account tenga acceso al archivo origen.")
+# -
+
+# ### Agrupados por Producto
+
+# +
+# Logica de los Datos
+
+sql_grafico3 = """
+    SELECT Producto, 
+        Fecha_Pago,
+        ROUND(SUM(TOTAL)) AS Total_Ganancia
+    FROM ``pan-database-491915.datset.ventas_final`
+    WHERE TOTAL IS NOT NULL
+    GROUP BY Producto
+    ORDER BY Fecha_Pago DESC;
+"""
+
+# +
+
+
+try: 
+    df = cargar_datos(sql_grafico3)
+
+    if df.empty:
+        st.warning("No se encontraron datos validos. Revisa la tabla de BigQuery")
+    else:
+
+        grafico = (so.Plot(df, "Fecha_Pago", "Total_Ganancia")
+        .add(so.Line(color=".2", linewidth=1), group="Producto")
+        )
+
+        st.pyplot(grafico.plot())
+    
+except Exception as e:
+    st.error(f"Error al generar el grafico: {e}")
+    st.info(" Tip: Si el error es de permisos (403), comprueba que el email de la Service Account tenga acceso al archivo de origen.")
