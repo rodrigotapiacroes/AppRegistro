@@ -142,6 +142,7 @@ try:
         grafico = (
             so.Plot(df, x="Fecha_Pago", y="Total_Ganancia")
             .add(so.Line())
+            .layout(size=(10,6))
         )
 
         # 4. Renderizamos y extraemos figura
@@ -185,7 +186,7 @@ try:
         grafico2 = (
             so.Plot(df, x="Fecha_Pago", y="Total_Ganancia", color="Producto")
             .add(so.Line(linewidth=1), group="Producto")
-            .layout(size=(10,5))
+            .layout(size=(10,6))
         )
 
         figura_final2 = grafico2.plot()._figure
