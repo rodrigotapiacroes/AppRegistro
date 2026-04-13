@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import streamlit as st
 from google.oauth2 import service_account
 from google.cloud import bigquery
@@ -137,6 +138,13 @@ try:
         st.warning("No se encontraron datos validos para lanzar el grafico")
 
     else:
+
+	st.subheader("Ganancia Total por Fecha")
+
+	df["Fecha_Pago"] = pd.to_datetime(df["Fecha_Pago"])
+
+	df = df.sort_values("Fecha_Pago") # Ordenacion cronologica
+	
         # 3. Creamos el gráfico usando seaborn.objects
         # Usamos 'df' que es donde guardaste la consulta
         grafico = (
@@ -146,6 +154,13 @@ try:
 
 	# 4. Renderizamos el gráfico a un objeto de Matplotlib
         figura_final = grafico.plot()._figure
+
+	# LIMPIEZA DEL EJE X: solo mostrar 5 fechas de referencia
+
+	for ax in figura_final.axes:
+		ax.axes.set_major_locator(mdates.AutoDateLocator(maxticks=5))
+		ax.axes.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+		plt.setp(ax.get.xticklabels(), rotation = 45)
         
         # 5. Mostramos el gráfico en Streamlit
         # La función .plot(figura_final) de seaborn.objects genera una figura de Matplotlib
@@ -182,12 +197,26 @@ try:
         st.warning("No se encontraron datos validos. Revisa la tabla de BigQuery")
     else:
 
-        grafico2 = (so.Plot(df, "Fecha_Pago", "Total_Ganancia")
-        .add(so.Line(color=".2", linewidth=1), group="Producto")
+	st.subheader("Ganancia Total por Fecha Agrupado por Producto")
+
+	df["Fecha_Pago"] = pd.to_datetime(df["Fecha_Pago"])
+
+	df = df.sort_values("Fecha_Pago") # Ordenacion cronologica
+
+        grafico2 = (so.Plot(df, "Fecha_Pago", "Total_Ganancia", color="Producto")
+        .add(so.Line(linewidth=1), group="Producto")
         )
 
 	# 2. Renderizamos el gráfico a un objeto de Matplotlib
         figura_final2 = grafico2.plot()._figure
+
+	# LIMPIEZA DEL EJE X: Solo mostrar 5 fechas de referencia
+
+	for ax in figura_final2.axes:
+		ax.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=5))
+		ax.xaxis.set_major_formatter(mdates.DateFromatter('%Y-%m-%d'))
+		plt.setp(ax.get_xticklabels(), rotation=45)
+
         st.pyplot(figura_final2)
     
 except Exception as e:
