@@ -149,7 +149,7 @@ try:
         
         # 5. Mostramos el gráfico en Streamlit
         # La función .plot(figura_final) de seaborn.objects genera una figura de Matplotlib
-        st.pyplot(grafico.plot())
+        st.pyplot(figura_final)
 
 except Exception as e:
     st.error(f"Error al generar el gráfico: {e}")
@@ -188,7 +188,7 @@ try:
 
 	# 2. Renderizamos el gráfico a un objeto de Matplotlib
         figura_final2 = grafico2.plot()._figure
-        st.pyplot(grafico.plot(figura_final2))
+        st.pyplot(figura_final2)
     
 except Exception as e:
     st.error(f"Error al generar el grafico: {e}")
