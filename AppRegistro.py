@@ -185,6 +185,7 @@ try:
         grafico2 = (
             so.Plot(df, x="Fecha_Pago", y="Total_Ganancia", color="Producto")
             .add(so.Line(linewidth=1), group="Producto")
+            .layout(size=(10,5))
         )
 
         figura_final2 = grafico2.plot()._figure
