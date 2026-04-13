@@ -143,10 +143,14 @@ try:
             so.Plot(df, x="Fecha_Pago", y="Total_Ganancia")
             .add(so.Line())
         )
+
+	# 4. Renderizamos el gráfico a un objeto de Matplotlib
+        figura_final = grafico.plot()
         
-        # 4. Mostramos el gráfico en Streamlit
-        # La función .plot() de seaborn.objects genera una figura de Matplotlib
+        # 5. Mostramos el gráfico en Streamlit
+        # La función .plot(figura_final) de seaborn.objects genera una figura de Matplotlib
         st.pyplot(grafico.plot())
+
 except Exception as e:
     st.error(f"Error al generar el gráfico: {e}")
     st.info("💡 Tip: Si el error es de permisos (403), comprueba que el email de la Service Account tenga acceso al archivo origen.")
@@ -182,7 +186,9 @@ try:
         .add(so.Line(color=".2", linewidth=1), group="Producto")
         )
 
-        st.pyplot(grafico.plot())
+	# 2. Renderizamos el gráfico a un objeto de Matplotlib
+        figura_final2 = grafico.plot()
+        st.pyplot(grafico.plot(figura_final2))
     
 except Exception as e:
     st.error(f"Error al generar el grafico: {e}")
