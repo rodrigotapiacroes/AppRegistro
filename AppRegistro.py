@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from google.oauth2 import service_account
 from google.cloud import bigquery
-import seaborn as so
+import seaborn as sns
+import seaborn.objects as so
 
 # --- 1. CONFIGURACIÓN DE LA PÁGINA (Siempre al inicio) ---
 st.set_page_config(page_title="Dashboard Pan Pa Ti", layout="wide", page_icon="🍞")
