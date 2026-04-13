@@ -4,3 +4,4 @@ pandas
 matplotlib
 db-dtypes
 google-auth
+seaborn
