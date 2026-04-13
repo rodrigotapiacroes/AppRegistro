@@ -145,7 +145,7 @@ try:
         )
 
 	# 4. Renderizamos el gráfico a un objeto de Matplotlib
-        figura_final = grafico.plot()
+        figura_final = grafico.plot()._figure
         
         # 5. Mostramos el gráfico en Streamlit
         # La función .plot(figura_final) de seaborn.objects genera una figura de Matplotlib
@@ -182,12 +182,12 @@ try:
         st.warning("No se encontraron datos validos. Revisa la tabla de BigQuery")
     else:
 
-        grafico = (so.Plot(df, "Fecha_Pago", "Total_Ganancia")
+        grafico2 = (so.Plot(df, "Fecha_Pago", "Total_Ganancia")
         .add(so.Line(color=".2", linewidth=1), group="Producto")
         )
 
 	# 2. Renderizamos el gráfico a un objeto de Matplotlib
-        figura_final2 = grafico.plot()
+        figura_final2 = grafico2.plot()._figure
         st.pyplot(grafico.plot(figura_final2))
     
 except Exception as e:
