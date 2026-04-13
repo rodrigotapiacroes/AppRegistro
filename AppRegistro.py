@@ -117,14 +117,14 @@ except Exception as e:
 # +
 ### Logica de los Datos
 
-sql_grafico2= """
-    SELECT
-        Fecha_Pago,
-        ROUND(SUM(TOTAL)) AS Total_Ganancia
-    FROM ´pan-database-491915.dataset.ventas_final´
-    WHERE Cantidad IS NOT NULL
-    GROUP BY Fecha_Pago
-    ORDER BY Fecha_Pago DESC;
+sql_grafico2 = """
+SELECT
+    Fecha_Pago,
+    ROUND(SUM(TOTAL)) AS Total_Ganancia
+FROM `pan-database-491915.dataset.ventas_final`
+WHERE TOTAL IS NOT NULL
+GROUP BY Fecha_Pago
+ORDER BY Fecha_Pago DESC
 """
 
 # +
@@ -157,14 +157,14 @@ except Exception as e:
 # Logica de los Datos
 
 sql_grafico3 = """
-    SELECT
-        Producto, 
-        Fecha_Pago,
-        ROUND(SUM(TOTAL)) AS Total_Ganancia
-    FROM `pan-database-491915.datset.ventas_final`
-    WHERE TOTAL IS NOT NULL
-    GROUP BY Producto
-    ORDER BY Fecha_Pago DESC;
+SELECT
+  Producto,
+  Fecha_Pago,
+  ROUND(SUM(TOTAL)) AS Total_Ganancia
+FROM `pan-database-491915.datset.ventas_final`
+WHERE TOTAL IS NOT NULL
+GROUP BY 1, 2
+ORDER BY Fecha_Pago DESC
 """
 
 # +
