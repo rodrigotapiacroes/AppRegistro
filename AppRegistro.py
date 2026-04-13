@@ -114,11 +114,10 @@ except Exception as e:
     st.error(f"Error al generar el gráfico: {e}")
     st.info("💡 Tip: Si el error es de permisos (403), comprueba que el email de la Service Account tenga acceso al archivo origen.")
 
+
 # ## Grafico de Lineas
 
-# +
-### Logica de los Datos
-
+# --- Logica de los Datos ---
 sql_grafico2 = """
 SELECT
     Fecha_Pago,
@@ -129,52 +128,37 @@ GROUP BY Fecha_Pago
 ORDER BY Fecha_Pago DESC
 """
 
-# +
-
 try:
     df = cargar_datos(sql_grafico2)
 
     if df.empty:
         st.warning("No se encontraron datos validos para lanzar el grafico")
-
     else:
-
-	st.subheader("Ganancia Total por Fecha")
-
-	df["Fecha_Pago"] = pd.to_datetime(df["Fecha_Pago"])
-
-	df = df.sort_values("Fecha_Pago") # Ordenacion cronologica
-	
+        st.subheader("Ganancia Total por Fecha")
+        df["Fecha_Pago"] = pd.to_datetime(df["Fecha_Pago"])
+        df = df.sort_values("Fecha_Pago")
+        
         # 3. Creamos el gráfico usando seaborn.objects
-        # Usamos 'df' que es donde guardaste la consulta
         grafico = (
             so.Plot(df, x="Fecha_Pago", y="Total_Ganancia")
             .add(so.Line())
         )
 
-	# 4. Renderizamos el gráfico a un objeto de Matplotlib
+        # 4. Renderizamos y extraemos figura
         figura_final = grafico.plot()._figure
 
-	# LIMPIEZA DEL EJE X: solo mostrar 5 fechas de referencia
-
-	for ax in figura_final.axes:
-		ax.axes.set_major_locator(mdates.AutoDateLocator(maxticks=5))
-		ax.axes.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-		plt.setp(ax.get.xticklabels(), rotation = 45)
+        # LIMPIEZA DEL EJE X
+        for ax in figura_final.axes:
+            ax.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=5))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+            plt.setp(ax.get_xticklabels(), rotation=45)
         
-        # 5. Mostramos el gráfico en Streamlit
-        # La función .plot(figura_final) de seaborn.objects genera una figura de Matplotlib
         st.pyplot(figura_final)
 
 except Exception as e:
-    st.error(f"Error al generar el gráfico: {e}")
-    st.info("💡 Tip: Si el error es de permisos (403), comprueba que el email de la Service Account tenga acceso al archivo origen.")
-# -
+    st.error(f"Error al generar el gráfico de líneas: {e}")
 
 # ### Agrupados por Producto
-
-# +
-# Logica de los Datos
 
 sql_grafico3 = """
 SELECT
@@ -187,38 +171,30 @@ GROUP BY 1, 2
 ORDER BY Fecha_Pago DESC
 """
 
-# +
-
-
 try: 
     df = cargar_datos(sql_grafico3)
 
     if df.empty:
         st.warning("No se encontraron datos validos. Revisa la tabla de BigQuery")
     else:
+        st.subheader("Ganancia Total por Fecha Agrupado por Producto")
+        df["Fecha_Pago"] = pd.to_datetime(df["Fecha_Pago"])
+        df = df.sort_values("Fecha_Pago")
 
-	st.subheader("Ganancia Total por Fecha Agrupado por Producto")
-
-	df["Fecha_Pago"] = pd.to_datetime(df["Fecha_Pago"])
-
-	df = df.sort_values("Fecha_Pago") # Ordenacion cronologica
-
-        grafico2 = (so.Plot(df, "Fecha_Pago", "Total_Ganancia", color="Producto")
-        .add(so.Line(linewidth=1), group="Producto")
+        # Gráfico agrupado por color
+        grafico2 = (
+            so.Plot(df, x="Fecha_Pago", y="Total_Ganancia", color="Producto")
+            .add(so.Line(linewidth=1), group="Producto")
         )
 
-	# 2. Renderizamos el gráfico a un objeto de Matplotlib
         figura_final2 = grafico2.plot()._figure
 
-	# LIMPIEZA DEL EJE X: Solo mostrar 5 fechas de referencia
-
-	for ax in figura_final2.axes:
-		ax.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=5))
-		ax.xaxis.set_major_formatter(mdates.DateFromatter('%Y-%m-%d'))
-		plt.setp(ax.get_xticklabels(), rotation=45)
+        for ax in figura_final2.axes:
+            ax.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=5))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+            plt.setp(ax.get_xticklabels(), rotation=45)
 
         st.pyplot(figura_final2)
     
 except Exception as e:
-    st.error(f"Error al generar el grafico: {e}")
-    st.info(" Tip: Si el error es de permisos (403), comprueba que el email de la Service Account tenga acceso al archivo de origen.")
+    st.error(f"Error al generar el grafico agrupado: {e}")
