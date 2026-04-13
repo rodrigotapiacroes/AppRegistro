@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from google.oauth2 import service_account
 from google.cloud import bigquery
-import seaborn as sbn
+import seaborn as so
 
 # --- 1. CONFIGURACIÓN DE LA PÁGINA (Siempre al inicio) ---
 st.set_page_config(page_title="Dashboard Pan Pa Ti", layout="wide", page_icon="🍞")
@@ -161,7 +161,7 @@ SELECT
   Producto,
   Fecha_Pago,
   ROUND(SUM(TOTAL)) AS Total_Ganancia
-FROM `pan-database-491915.datset.ventas_final`
+FROM `pan-database-491915.dataset.ventas_final`
 WHERE TOTAL IS NOT NULL
 GROUP BY 1, 2
 ORDER BY Fecha_Pago DESC
