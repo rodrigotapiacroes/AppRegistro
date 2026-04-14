@@ -80,26 +80,27 @@ def cargar_datos(query):
 
 client = obtener_cliente()
 
-## ---- 3. Interfaz del Usuario -----
+### --- 3. Interfaz del Usuario ---
 st.title("🍞 Dashboard de Ventas Pan Pa ti")
 
-### Boton para forzar la actualizacion
+# El botón solo sirve para "limpiar" y "reiniciar"
 if st.button('🔄 Actualizar datos ahora'):
+    st.cache_data.clear() # Esto borra los datos viejos guardados
+    st.rerun()            # Esto obliga a la app a empezar de cero y leer BigQuery
 
+### --- 4. LÓGICA DE LOS DATOS (Fuera del IF para que siempre funcione) ---
 
-## ---- 4. LOGICA DE LOS DATOS: Seleccion de datos desde la base de datos de BigQuery ----
-
+# Usamos comillas invertidas ` para la tabla y corregimos el GROUP BY
 sql_grafico = """
     SELECT
-      Producto,
-      Fecha_Pago,
-      ROUND(SUM(TOTAL)) AS Total_Ganancia
-FROM ´pan-database-491915.dataset.ventas_final´
-WHERE TOTAL IS NOT NULL
-GROUP BY Fecha_Pago DESC
-ORDER BY 1, 2
+        Producto,
+        Fecha_Pago,
+        ROUND(SUM(TOTAL)) AS Total_Ganancia
+    FROM `pan-database-491915.dataset.ventas_final`
+    WHERE TOTAL IS NOT NULL
+    GROUP BY Producto, Fecha_Pago
+    ORDER BY Fecha_Pago DESC
 """
-
 try: 
     df3 = cargar_datos(sql_grafico3)
 
