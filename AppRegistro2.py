@@ -84,7 +84,7 @@ client = obtener_cliente()
 st.title("🍞 Dashboard de Ventas Pan Pa ti")
 
 ### Boton para forzar la actualizacion
-if st.button('🔄 Actualizar datos ahora')
+if st.button('🔄 Actualizar datos ahora'):
 
 
 ## ---- 4. LOGICA DE LOS DATOS: Seleccion de datos desde la base de datos de BigQuery ----
