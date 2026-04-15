@@ -167,3 +167,136 @@ try:
 
 except Exception as e:
     st.error(f"Hubo un error al procesar el código: {e}")
+
+# try:
+    # 1. CARGA E INICIALIZACIÓN DE DATOS
+    df_raw = cargar_datos(sql_grafico)
+
+    if df_raw.empty:
+        st.warning("La base de datos respondió, pero no hay registros para mostrar.")
+    else:
+        # Preparación de fechas (Aseguramos formato fecha de Python)
+        df_raw["Fecha_Pago"] = pd.to_datetime(df_raw["Fecha_Pago"]).dt.date
+        df_raw = df_raw.sort_values("Fecha_Pago")
+
+        st.divider()
+
+        # --- 2. ÁREA DE FILTROS (SELECTORES) ---
+        col_fecha, col_dim, col_metrica = st.columns([2, 2, 2])
+
+        with col_fecha:
+            f_min, f_max = df_raw["Fecha_Pago"].min(), df_raw["Fecha_Pago"].max()
+            rango_fechas = st.date_input("📅 Rango de tiempo:", value=(f_min, f_max))
+
+        with col_dim:
+            dict_dims = {
+                "🍞 Productos": "Producto",
+                "👤 Clientes": "Cliente",
+                "💳 Tipo de Venta": "Tipo_Venta",
+                "📊 Aplica IEPS": "aplica_ieps",
+                "📅 Fecha de Pago": "Fecha_Pago"
+            }
+            dim_label = st.selectbox("🔍 Analizar por (Dimensión):", list(dict_dims.keys()))
+            col_dim_actual = dict_dims[dim_label]
+
+        with col_metrica:
+            dict_mets = {
+                "💰 Ganancia Total": "Total_Ganancia",
+                "🛒 Unidades Vendidas": "Total Vendido",
+                "📦 Variedad de Productos": "Total Productos"
+            }
+            met_label = st.selectbox("📊 Métrica (Eje Y):", list(dict_mets.keys()))
+            col_met_actual = dict_mets[met_label]
+
+        # --- 3. SELECCIÓN DE ELEMENTOS ESPECÍFICOS ---
+        opciones_disponibles = sorted(df_raw[col_dim_actual].unique().tolist())
+        seleccion = st.multiselect(
+            f"Selecciona elementos de {dim_label}:",
+            options=opciones_disponibles,
+            default=opciones_disponibles[:3] if len(opciones_disponibles) >= 3 else opciones_disponibles
+        )
+
+        # --- 4. FILTRADO DE DATOS ---
+        if isinstance(rango_fechas, tuple) and len(rango_fechas) == 2:
+            inicio, fin = rango_fechas
+            mask = (
+                (df_raw["Fecha_Pago"] >= inicio) & 
+                (df_raw["Fecha_Pago"] <= fin) &
+                (df_raw[col_dim_actual].isin(seleccion))
+            )
+            df_filtrado = df_raw.loc[mask]
+
+            if not df_filtrado.empty:
+                
+                # =========================================================
+                # GRÁFICO 1: EVOLUCIÓN TEMPORAL (LÍNEAS)
+                # =========================================================
+                st.subheader(f"📈 Evolución Temporal: {met_label}")
+                
+                # Usamos seaborn.objects para un estilo moderno de líneas
+                grafico_lineas = (
+                    so.Plot(df_filtrado, x="Fecha_Pago", y=col_met_actual, color=col_dim_actual)
+                    .add(so.Line(linewidth=2.5, marker='o'), group=col_dim_actual)
+                    .label(x="Día", y=met_label, color=dim_label)
+                    .layout(size=(12, 5))
+                )
+                
+                # Ajuste de etiquetas de fecha en el gráfico de líneas
+                fig_lineas = grafico_lineas.plot()._figure
+                for ax in fig_lineas.axes:
+                    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m'))
+                    plt.setp(ax.get_xticklabels(), rotation=30)
+                
+                st.pyplot(fig_lineas)
+
+                st.write("---") # Separador visual entre gráficos
+
+                # =========================================================
+                # GRÁFICO 2: COMPARATIVA GLOBAL (BARRAS)
+                # =========================================================
+                st.subheader(f"📊 Comparativa de Totales: {met_label}")
+
+                # Agrupamos para obtener el total absoluto del periodo seleccionado
+                df_barras = df_filtrado.groupby(col_dim_actual)[col_met_actual].sum().reset_index()
+                
+                # Orden inteligente: Cronológico si es fecha, Ranking si es texto
+                if col_dim_actual == "Fecha_Pago":
+                    df_barras = df_barras.sort_values(by="Fecha_Pago")
+                else:
+                    df_barras = df_barras.sort_values(by=col_met_actual, ascending=False)
+
+                fig_barras, ax_bar = plt.subplots(figsize=(12, 6))
+                colores = plt.cm.Paired(range(len(df_barras)))
+
+                bars = ax_bar.bar(
+                    df_barras[col_dim_actual].astype(str), 
+                    df_barras[col_met_actual], 
+                    color=colores, edgecolor='black', alpha=0.8
+                )
+
+                # Etiquetas de valor sobre las barras
+                for bar in bars:
+                    yval = bar.get_height()
+                    ax_bar.text(
+                        bar.get_x() + bar.get_width()/2, 
+                        yval, f'{int(yval):,}', 
+                        ha='center', va='bottom', fontweight='bold'
+                    )
+
+                ax_bar.set_ylabel(met_label)
+                plt.xticks(rotation=45, ha='right')
+                ax_bar.spines['top'].set_visible(False)
+                ax_bar.spines['right'].set_visible(False)
+                plt.tight_layout()
+
+                st.pyplot(fig_barras)
+
+                # TABLA DETALLADA (Expandible)
+                with st.expander("📄 Ver detalles de la tabla de datos"):
+                    st.dataframe(df_filtrado, use_container_width=True)
+
+            else:
+                st.info("No hay datos para mostrar con los filtros actuales.")
+
+except Exception as e:
+    st.error(f"Se detectó un error en la generación: {e}")
