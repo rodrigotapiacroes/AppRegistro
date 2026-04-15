@@ -164,6 +164,27 @@ try:
                 st.pyplot(fig)
             else:
                 st.info("No hay datos que coincidan con los filtros seleccionados.")
+# =========================================================
+# TABLA DETALLADA PARA EL GRÁFICO DE LÍNEAS
+# =========================================================
+    with st.expander("📈 Ver desglose diario (Histórico)"):
+        # 1. Seleccionamos solo las columnas relevantes para no saturar
+        df_lineas_tab = df_filtrado[["Fecha_Pago", col_dim_actual, col_met_actual]].copy()
+    
+        # 2. Ordenamos por fecha para que la lectura sea lógica (del más reciente al más antiguo)
+        df_lineas_tab = df_lineas_tab.sort_values(by="Fecha_Pago", ascending=False)
+    
+        # 3. Renombramos para que el usuario vea nombres amigables
+        df_lineas_tab.columns = ["Fecha", dim_label, met_label]
+    
+        # 4. Formateamos la fecha a un formato más legible (DD/MM/YYYY)
+        df_lineas_tab["Fecha"] = pd.to_datetime(df_lineas_tab["Fecha"]).dt.strftime('%d/%m/%Y')
+
+        # 5. Formateamos los números con comas
+        df_lineas_tab[met_label] = df_lineas_tab[met_label].apply(lambda x: f"{int(x):,}")
+    
+        # 6. Renderizamos
+        st.dataframe(df_lineas_tab, use_container_width=True, hide_index=True)
 
 except Exception as e:
     st.error(f"Hubo un error al procesar el código: {e}")
@@ -269,3 +290,17 @@ if not df_filtrado_barras.empty:
 
     # 7. Renderizado en Streamlit
     st.pyplot(fig)
+# --- TABLA DETALLADA (Justo debajo del gráfico de barras) ---
+    with st.expander("📋 Ver tabla de datos detallada (Totales)"):
+        # Creamos una copia para no afectar el gráfico
+        df_mostrar = df_plot.copy()
+    
+        # Renombramos las columnas para que se vean bien en la tabla
+        df_mostrar.columns = [dim_label, met_label]
+    
+        # Formateamos los números para que tengan comas (ej: 1,250 en lugar de 1250)
+        # Solo si el valor es numérico
+        df_mostrar[met_label] = df_mostrar[met_label].apply(lambda x: f"{int(x):,}")
+    
+        # Mostramos la tabla ocupando todo el ancho y sin el índice aburrido de la izquierda
+        st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
