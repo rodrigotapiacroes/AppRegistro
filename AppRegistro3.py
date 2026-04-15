@@ -66,7 +66,7 @@ sql_grafico = """
         Tipo_Venta,
         aplica_ieps,
         ROUND(SUM(TOTAL)) AS Total_Ganancia,
-        ROUND(SUM(Cantidad)) AS `Total Vendido`
+        ROUND(SUM(Cantidad)) AS `Total Vendido`,
 	COUNT(Producto) AS `Total Productos`
     FROM `pan-database-491915.dataset.ventas_final`
     WHERE TOTAL IS NOT NULL
@@ -109,7 +109,7 @@ try:
                 "🍞 Productos": "Producto",
                 "👤 Clientes": "Cliente",
                 "💳 Tipo de Venta": "Tipo_de_Venta",
-                "📊 Impuesto IEPS (8%)": "ieps_8"
+                "📊 Impuesto IEPS (8%)": "aplica_ieps"
             }
             dim_label = st.selectbox("🔍 Analizar por:", list(dict_dims.keys()))
             col_dim_actual = dict_dims[dim_label]
