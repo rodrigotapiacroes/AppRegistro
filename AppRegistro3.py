@@ -63,13 +63,13 @@ sql_grafico = """
         Fecha_Pago,
         Producto,
         Cliente,
-        Tipo_de_Venta,
-        ieps_8,
+        Tipo_Venta,
+        aplica_ieps,
         ROUND(SUM(TOTAL)) AS Total_Ganancia,
         COUNT(*) AS Numero_Ventas
     FROM `pan-database-491915.dataset.ventas_final`
     WHERE TOTAL IS NOT NULL
-    GROUP BY Fecha_Pago, Producto, Cliente, Tipo_de_Venta, ieps_8
+    GROUP BY Fecha_Pago, Producto, Cliente, Tipo_Venta, aplica_ieps
     ORDER BY Fecha_Pago DESC
 """
 
