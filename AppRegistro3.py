@@ -108,7 +108,7 @@ try:
             dict_dims = {
                 "🍞 Productos": "Producto",
                 "👤 Clientes": "Cliente",
-                "💳 Tipo de Venta": "Tipo_de_Venta",
+                "💳 Tipo de Venta": "Tipo_Venta",
                 "📊 Impuesto IEPS (8%)": "aplica_ieps"
             }
             dim_label = st.selectbox("🔍 Analizar por:", list(dict_dims.keys()))
