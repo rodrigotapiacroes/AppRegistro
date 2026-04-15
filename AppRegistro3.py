@@ -66,7 +66,8 @@ sql_grafico = """
         Tipo_Venta,
         aplica_ieps,
         ROUND(SUM(TOTAL)) AS Total_Ganancia,
-        COUNT(*) AS Numero_Ventas
+        ROUND(SUM(Cantidad)) AS `Total Vendido`
+	COUNT(Producto) AS `Total Productos`
     FROM `pan-database-491915.dataset.ventas_final`
     WHERE TOTAL IS NOT NULL
     GROUP BY Fecha_Pago, Producto, Cliente, Tipo_Venta, aplica_ieps
@@ -117,7 +118,8 @@ try:
             # Filtro de Eje Y (¿Qué valor queremos medir?)
             dict_mets = {
                 "💰 Ganancia Total": "Total_Ganancia",
-                "🛒 Cantidad de Ventas": "Numero_Ventas"
+                "🛒 Cantidad de Ventas": "Total Vendido",
+                "📦 Total de Productos: "Total Productos"
             }
             met_label = st.selectbox("📊 Métrica (Eje Y):", list(dict_mets.keys()))
             col_met_actual = dict_mets[met_label]
