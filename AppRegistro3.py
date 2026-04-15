@@ -214,22 +214,22 @@ seleccion = st.multiselect(
 df_filtrado_barras = df_raw[df_raw[col_dim_actual].isin(seleccion)]
 
 if not df_filtrado_barras.empty:
-    # Agrupamos para obtener un solo total por categoría
+    # 1. Agrupamos para obtener un solo total por categoría
     df_plot = df_filtrado_barras.groupby(col_dim_actual)[col_met_actual].sum().reset_index()
 
-    # Ordenamiento: Cronológico si es Fecha, por Valor (Ranking) si es texto
+    # 2. Ordenamiento inteligente
     if col_dim_actual == "Fecha_Pago":
         df_plot = df_plot.sort_values(by="Fecha_Pago")
     else:
         df_plot = df_plot.sort_values(by=col_met_actual, ascending=False)
 
-    # 4. CREACIÓN DEL GRÁFICO (MATPLOTLIB)
-    fig, ax = plt.subplots(figsize=(12, 6))
-    
-    # Paleta de colores automática
+    # --- LÍNEA VITAL: Creamos la figura y los ejes antes de usarlos ---
+    fig, ax = plt.subplots(figsize=(12, 6)) # <-- SIN ESTO, EL RESTO FALLA
+
+    # 3. Generamos la paleta de colores
     colores = plt.cm.tab10(range(len(df_plot)))
 
-    # Dibujamos las barras
+    # 4. Dibujamos las barras
     bars = ax.bar(
         df_plot[col_dim_actual].astype(str), 
         df_plot[col_met_actual], 
@@ -238,8 +238,15 @@ if not df_filtrado_barras.empty:
         alpha=0.8
     )
 
-    # 5. ETIQUETAS DE VALOR (DATA LABELS)
-    # Pone el número encima de cada barra
+    # --- AGREGAR LEYENDA (Tus líneas correctas) ---
+    etiquetas = df_plot[col_dim_actual].astype(str).tolist()
+    for bar, etiqueta in zip(bars, etiquetas):
+        bar.set_label(etiqueta) # <--- ASIGNACIÓN
+
+    # Mostramos la leyenda fuera del gráfico
+    ax.legend(title=dim_label, bbox_to_anchor=(1.05, 1), loc='upper left')
+
+    # 5. ETIQUETAS DE VALOR SOBRE LAS BARRAS
     for bar in bars:
         yval = bar.get_height()
         ax.text(
@@ -250,15 +257,15 @@ if not df_filtrado_barras.empty:
             fontweight='bold', fontsize=10
         )
 
-    # 6. ESTÉTICA FINAL
+    # 6. Estética final
     ax.set_title(f"📊 {met_label} por {dim_label}", fontsize=14, pad=20)
     ax.set_ylabel(met_label)
     plt.xticks(rotation=45, ha='right')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
+    
+    # Ajustamos el layout para que la leyenda no se corte
     plt.tight_layout()
 
-    # 7. RENDERIZADO EN STREAMLIT
+    # 7. Renderizado en Streamlit
     st.pyplot(fig)
-else:
-    st.info("Selecciona elementos para generar el gráfico de barras.")
