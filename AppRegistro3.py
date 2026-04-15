@@ -243,7 +243,9 @@ if not df_filtrado_barras.empty:
         df_plot = df_plot.sort_values(by="Fecha_Pago")
     else:
         df_plot = df_plot.sort_values(by=col_met_actual, ascending=False)
-
+        
+    st.subheader(f"{met_label} por {dim_label}") # <-- Streamlit dibujará los emojis sin problemas
+    
     # --- LÍNEA VITAL: Creamos la figura y los ejes antes de usarlos ---
     fig, ax = plt.subplots(figsize=(12, 6)) # <-- SIN ESTO, EL RESTO FALLA
 
@@ -279,7 +281,7 @@ if not df_filtrado_barras.empty:
         )
 
     # 6. Estética final
-    ax.set_title(f"📊 {met_label} por {dim_label}", fontsize=14, pad=20)
+    
     ax.set_ylabel(met_label)
     plt.xticks(rotation=45, ha='right')
     ax.spines['top'].set_visible(False)
