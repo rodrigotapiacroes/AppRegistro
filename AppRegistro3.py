@@ -119,7 +119,7 @@ try:
             dict_mets = {
                 "💰 Ganancia Total": "Total_Ganancia",
                 "🛒 Cantidad de Ventas": "Total Vendido",
-                "📦 Total de Productos: "Total Productos"
+                "📦 Total de Productos":"Total Productos"
             }
             met_label = st.selectbox("📊 Métrica (Eje Y):", list(dict_mets.keys()))
             col_met_actual = dict_mets[met_label]
