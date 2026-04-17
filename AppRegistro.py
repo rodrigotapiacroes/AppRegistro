@@ -123,6 +123,19 @@ except Exception as e:
     st.error(f"Error al generar el gráfico: {e}")
     st.info("💡 Tip: Si el error es de permisos (403), comprueba que el email de la Service Account tenga acceso al archivo origen.")
 
+def enviar_telegram(mensaje):
+    # Intentamos sacar las llaves de Secrets (Streamlit Cloud)
+    try:
+        token = st.secrets["telegram"]["token"]
+        chat_id = st.secrets["telegram"]["chat_id"]
+    except:
+        # Si estás en local, puedes ponerlas aquí manualmente para probar
+        token = "8687826455:AAHtpcu9uiHBENsaTDl5nOC7U5EJ8XQ79nM"
+        chat_id = "7114539076"
+        
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": mensaje, "parse_mode": "Markdown"}
+    return requests.post(url, json=payload)
 
 # ## Grafico de Lineas
 
@@ -130,7 +143,8 @@ except Exception as e:
 sql_grafico2 = """
 SELECT
     Fecha_Pago,
-    ROUND(SUM(TOTAL)) AS Total_Ganancia
+    ROUND(SUM(TOTAL))
+    ROUND(SUM(Cantidad))
 FROM `pan-database-491915.dataset.ventas_final`
 WHERE TOTAL IS NOT NULL
 GROUP BY Fecha_Pago
@@ -211,23 +225,46 @@ except Exception as e:
     st.error(f"Error al generar el grafico agrupado: {e}")
 
 # --- CONSULTA 2: PARA EL RESUMEN DE TELEGRAM ---
-# Esta consulta es más específica (solo totales, balances, etc.)
-query_resumen = """ SELECT 
-                      Fecha_Pago AS `Fecha de Pago`,
-                      Producto,
-                      ROUND(SUM(Cantidad)) AS ´Cantidad Vendida´,
-                      ROUND(SUM(Total)) AS `Total de Venta`
-                  FROM `pan-database-491915.dataset.ventas_final`
-                  GROUP BY Producto,`Fecha de Pago`
-                  ORDER BY `Fecha de Pago`
+# --- CONSULTA PARA TELEGRAM ---
+query_resumen = """ 
+    SELECT 
+        Fecha_Pago,
+        ROUND(SUM(TOTAL)) AS Total_Dia
+    FROM `pan-database-491915.dataset.ventas_final`
+    GROUP BY Fecha_Pago
+    ORDER BY Fecha_Pago DESC
 """ 
 
-# El botón actúa como un "escudo": nada de lo que está adentro
-# se ejecuta si no presionas el botón.
 if st.button("🚀 Enviar Resumen a Telegram"):
-    # Solo cuando picas el botón, Python va a BigQuery por estos datos
-    df_resumen = client.query(query_resumen).to_dataframe()
-    
-    # Aquí armamos el mensaje con los datos de df_resumen
-    # y lo enviamos
-    enviar_telegram(mensaje_formateado)
+    try:
+        # 1. Obtener datos
+        df_resumen = client.query(query_resumen).to_dataframe()
+        
+        if not df_resumen.empty:
+            r = df_resumen.iloc[0]
+            
+            # 2. Formatear el mensaje
+            fecha_str = r['Fecha_Pago']
+            venta_total = r['Total_Dia']
+            
+            mensaje_formateado = (
+                f"🥖 *REPORTE PAN PA TI* 🥖\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n"
+                f"📅 *Día:* {fecha_str}\n"
+                f"💰 *Venta Total:* ${venta_total:,.2f}\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n"
+                f"✅ _Cierre generado desde el Dashboard_"
+            )
+            
+            # 3. Enviar
+            respuesta = enviar_telegram(mensaje_formateado)
+            
+            if respuesta.status_code == 200:
+                st.success("¡Mensaje enviado a Telegram! 📱")
+            else:
+                st.error(f"Telegram no recibió el mensaje: {respuesta.text}")
+        else:
+            st.warning("No se encontraron ventas para enviar.")
+            
+    except Exception as e:
+        st.error(f"Error en el proceso de Telegram: {e}")
