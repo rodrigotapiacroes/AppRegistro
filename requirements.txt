@@ -5,6 +5,5 @@ matplotlib
 db-dtypes
 google-auth
 seaborn
-request
 pandas-gbq
-requests    <--- AGREGA ESTA
+requests 
