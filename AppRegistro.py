@@ -5,9 +5,8 @@ Las limitacionees es que necesita estar constantemente actualizando el script en
 
  """
 
-
-
 import os
+import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -229,9 +228,10 @@ except Exception as e:
 query_resumen = """ 
     SELECT 
         Fecha_Pago,
+        Producto,
         ROUND(SUM(TOTAL)) AS Total_Dia
     FROM `pan-database-491915.dataset.ventas_final`
-    GROUP BY Fecha_Pago
+    GROUP BY Producto, Fecha_Pago
     ORDER BY Fecha_Pago DESC
 """ 
 
