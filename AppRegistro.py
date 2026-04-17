@@ -1,3 +1,12 @@
+# AUTOMATIZACION POR CONEXION DE DATOS !!
+""" En este script se usa la automatizacion nivel basico. Esta conexion actualiza los graficos basados en la base de datos de BigQuery, la cual esta constantemente registrando datos segun el uso. Esto ocurre sin que se tenga que abrir Anaconda prompt ni tocar el codigo. Se incluye un boton inteligente para forzar la actualizacion de la memoria.
+
+Las limitacionees es que necesita estar constantemente actualizando el script en Github con el que esta conectado streamlit y BigQuery.
+
+ """
+
+
+
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -200,3 +209,25 @@ try:
     
 except Exception as e:
     st.error(f"Error al generar el grafico agrupado: {e}")
+
+# --- CONSULTA 2: PARA EL RESUMEN DE TELEGRAM ---
+# Esta consulta es más específica (solo totales, balances, etc.)
+query_resumen = """ SELECT 
+                      Fecha_Pago AS `Fecha de Pago`,
+                      Producto,
+                      ROUND(SUM(Cantidad)) AS ´Cantidad Vendida´,
+                      ROUND(SUM(Total)) AS `Total de Venta`
+                  FROM `pan-database-491915.dataset.ventas_final`
+                  GROUP BY Producto,`Fecha de Pago`
+                  ORDER BY `Fecha de Pago`
+""" 
+
+# El botón actúa como un "escudo": nada de lo que está adentro
+# se ejecuta si no presionas el botón.
+if st.button("🚀 Enviar Resumen a Telegram"):
+    # Solo cuando picas el botón, Python va a BigQuery por estos datos
+    df_resumen = client.query(query_resumen).to_dataframe()
+    
+    # Aquí armamos el mensaje con los datos de df_resumen
+    # y lo enviamos
+    enviar_telegram(mensaje_formateado)
