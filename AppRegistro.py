@@ -142,7 +142,7 @@ def enviar_telegram(mensaje):
 sql_grafico2 = """
 SELECT
     Fecha_Pago,
-    ROUND(SUM(TOTAL)),
+    ROUND(SUM(TOTAL)) AS Total_Ganancia,
     ROUND(SUM(Cantidad))
 FROM `pan-database-491915.dataset.ventas_final`
 WHERE TOTAL IS NOT NULL
