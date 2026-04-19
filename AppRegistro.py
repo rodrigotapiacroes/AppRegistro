@@ -126,15 +126,23 @@ def enviar_telegram(mensaje):
     # Intentamos sacar las llaves de Secrets (Streamlit Cloud)
     try:
         token = st.secrets["telegram"]["token"]
-        chat_id = st.secrets["telegram"]["chat_id"]
+        # En Streamlit Secrets, puedes guardar los IDs separados por coma: "ID1, ID 2"
+        # o convertirlo en una lista.
+        raw_ids = str(st.secrets["telegram"]["chat_id"])
+        destinatarios = [id.strip() for id in raw_ids.split(",")]
     except:
         # Si estás en local, puedes ponerlas aquí manualmente para probar
         token = "8687826455:AAHtpcu9uiHBENsaTDl5nOC7U5EJ8XQ79nM"
-        chat_id = "7114539076"
-        
+        destinatarios = ["7114539076", "6507364524"]
+# 2. Ciclo para enviar el mensaje a cada persona
+respuestas =  []
+for persona_id in destinatarios:
+       
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {"chat_id": chat_id, "text": mensaje, "parse_mode": "Markdown"}
-    return requests.post(url, json=payload)
+    payload = {"chat_id": persona_id, "text": mensaje, "parse_mode": "Markdown"}
+    r = requests.post(url, json=payload)
+    respuestas.append(r)
+return respuestas # Devuelve una lista con los estados de los envios
 
 # ## Grafico de Lineas
 
@@ -219,7 +227,7 @@ try:
             plt.setp(ax.get_xticklabels(), rotation=45)
 
         st.pyplot(figura_final2)
-    
+
 except Exception as e:
     st.error(f"Error al generar el grafico agrupado: {e}")
 
