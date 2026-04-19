@@ -123,26 +123,28 @@ except Exception as e:
     st.info("💡 Tip: Si el error es de permisos (403), comprueba que el email de la Service Account tenga acceso al archivo origen.")
 
 def enviar_telegram(mensaje):
-    # Intentamos sacar las llaves de Secrets (Streamlit Cloud)
+    # 1. Intentamos sacar las llaves de Secrets (Streamlit Cloud)
     try:
         token = st.secrets["telegram"]["token"]
-        # En Streamlit Secrets, puedes guardar los IDs separados por coma: "ID1, ID 2"
-        # o convertirlo en una lista.
         raw_ids = str(st.secrets["telegram"]["chat_id"])
         destinatarios = [id.strip() for id in raw_ids.split(",")]
     except:
-        # Si estás en local, puedes ponerlas aquí manualmente para probar
+        # Si estás en local o fallan los secrets
         token = "8687826455:AAHtpcu9uiHBENsaTDl5nOC7U5EJ8XQ79nM"
-        destinatarios = ["7114539076", "6507364524"]
-# 2. Ciclo para enviar el mensaje a cada persona
-respuestas =  []
-for persona_id in destinatarios:
-       
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {"chat_id": persona_id, "text": mensaje, "parse_mode": "Markdown"}
-    r = requests.post(url, json=payload)
-    respuestas.append(r)
-return respuestas # Devuelve una lista con los estados de los envios
+        destinatarios = ["7114539076", "6507364524"] # Asegúrate que el segundo ID sea real
+
+    # 2. Ciclo para enviar el mensaje a cada persona
+    respuestas = []
+    for persona_id in destinatarios:
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        payload = {"chat_id": persona_id, "text": mensaje, "parse_mode": "Markdown"}
+        try:
+            r = requests.post(url, json=payload)
+            respuestas.append(r)
+        except Exception as e:
+            print(f"Error enviando a {persona_id}: {e}")
+            
+    return respuestas # Devuelve la lista de respuestas
 
 # ## Grafico de Lineas
 
