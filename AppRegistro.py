@@ -266,13 +266,18 @@ if st.button("🚀 Enviar Resumen a Telegram"):
                 f"✅ _Cierre generado desde el Dashboard_"
             )
             
-            # 3. Enviar
-            respuesta = enviar_telegram(mensaje_formateado)
+            # 3. Enviar (Esto ahora devuelve una LISTA de respuestas)
+            lista_respuestas = enviar_telegram(mensaje_formateado)
             
-            if respuesta.status_code == 200:
-                st.success("¡Mensaje enviado a Telegram! 📱")
+            # 4. Verificar resultados
+            exitos = [res for res in lista_respuestas if res.status_code == 200]
+            
+            if len(exitos) == len(lista_respuestas):
+                st.success(f"¡Mensaje enviado con éxito a todos ({len(exitos)})! 📱")
+            elif len(exitos) > 0:
+                st.warning(f"Se envió a {len(exitos)} personas, pero algunas fallaron.")
             else:
-                st.error(f"Telegram no recibió el mensaje: {respuesta.text}")
+                st.error("No se pudo enviar el mensaje a ningún destinatario.")
         else:
             st.warning("No se encontraron ventas para enviar.")
             
